@@ -1,33 +1,44 @@
+import "reflect-metadata";
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { PrismaClient } from "@prisma/client";
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import { buildTypeDefsAndResolvers } from 'type-graphql';
+
+import { ReadUserResolver } from './src/models/Read';
+import { CreateUserResolver } from './src/models/Create';
 
 // Initialize prisma instance
 const prisma = new PrismaClient();
 
-// The GraphQL schema
-const typeDefs = `#graphql
-  type Query {
-    hello: String
-  }
-`;
+// // The GraphQL schema
+// const typeDefs = `#graphql
+//   type Query {
+//     hello: String
+//   }
+// `;
 
-// A map of functions which return data for the schema.
-const resolvers = {
-  Query: {
-    hello: () => 'world',
-  },
-};
+// // A map of functions which return data for the schema.
+// const resolvers = {
+//   Query: {
+//     hello: () => 'world',
+//   },
+// };
+
+const { typeDefs, resolvers } = await buildTypeDefsAndResolvers({
+  resolvers: [
+    ReadUserResolver,
+    CreateUserResolver
+  ]
+});
 
 const app = express();
 
 // Set up Apollo Server
 const server = new ApolloServer({
-  typeDefs,
-  resolvers,
+  typeDefs, resolvers,
 });
 await server.start();
 
